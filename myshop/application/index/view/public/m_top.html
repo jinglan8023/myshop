@@ -1,0 +1,52 @@
+<div class="m_top_bg">
+    <div class="top">
+        <div class="m_logo"><a href="{:url('index/index')}"><img src="__STATIC__/index/images/ds.jpg" width="150px" height="58px" /></a></div>
+        <div class="m_search">
+            <form>
+                <input type="text" value="" class="m_ipt" />
+                <input type="submit" value="搜索" class="m_btn" />
+            </form>
+            <span class="fl"><a href="#">咖啡</a><a href="#">iphone 6S</a><a href="#">新鲜美食</a><a href="#">蛋糕</a><a href="#">日用品</a><a href="#">连衣裙</a></span>
+        </div>
+        <div class="i_car">
+            <div class="car_t"><a href="{:url('cart/buycarone')}">购物车 [ <span id="topnum"></span> ]</a></div>
+            <div class="car_bg">
+                {if condition="$login eq 2"}
+                <!--Begin 购物车未登录 Begin-->
+                <div class="un_login">还未登录！<a href="{:url('login/login')}" style="color:#ff4e00;">马上登录</a> 查看购物车！</div>
+                <!--End 购物车未登录 End-->
+                {/if}
+                <!--Begin 购物车已登录 Begin-->
+                {if condition="!empty($cartGoodsInfo)"}
+                <div style="height: 200px;overflow-y: auto;">
+                    <ul class="cars">
+                        {volist name="$cartGoodsInfo" id='v'}
+                        <li class="aprice">
+                            <input type="hidden" class="subtotal" value="{$v.market_price*$v.buy_number}">
+                            <div class="img"><a href="#"><img src="__ROOT__/uploads/goodsimg/{$v.goods_img}" width="58" height="58" /></a></div>
+                            <div class="name"><a href="#">{$v.goods_name}</a></div>
+                            <div class="price"><font color="#ff4e00">￥{$v.market_price}</font> X{$v.buy_number}</div>
+                        </li>
+                        {/volist}
+                    </ul>
+                </div>
+                {/if}
+                <div class="price_sum">共计&nbsp; <font color="#ff4e00">￥</font><span id="total"></span></div>
+                <div class="price_a"><a href="{:url('cart/buycarone')}">去购物车结算</a></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(function(){
+        var total=0;
+        var num=$('.aprice').length;
+        $('.aprice').each(function(index){
+            var subtotal=parseInt($(this).find("input[class='subtotal']").val());
+            //console.log(subtotal);
+            total+=subtotal;
+        });
+        $('#total').text(total);//总的价钱
+        $('#topnum').text(num);//购买商品种类
+    })
+</script>

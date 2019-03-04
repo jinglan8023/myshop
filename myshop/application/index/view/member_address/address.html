@@ -1,0 +1,193 @@
+{include file="public/m_top" /}
+<!--End Header End-->
+<div class="i_bg bg_color">
+    <!--Begin 用户中心 Begin -->
+    <div class="m_content">
+        {include file="public/m_left" /}
+        <div class="m_right">
+        <p></p>
+        <div class="mem_tit">收货地址</div>
+        {volist name='addressInfo' id='v'}
+        {if condition="$v['address_dafault'] eq 1"}
+        {assign name='bcolor' value='border-color:#ff4e00'}
+        {else /}
+        {assign name='bcolor' value=''}
+        {/if}
+        <div class="address" style="{$bcolor}">
+            <div class="a_close"><a href="javascript:;" address_id="{$v.address_id}" class="del"><img src="__STATIC__/index/images/a_close.png" /></a></div>
+            <table border="0" class="add_t" align="center" style="width:98%; margin:10px auto;" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td align="right" width="100">收货人姓名：</td>
+                    <td>{$v.address_man}</td>
+                </tr>
+                <tr>
+                    <td align="right">配送区域：</td>
+                    <td>{$v.area}</td>
+                </tr>
+                <tr>
+                    <td align="right">详细地址：</td>
+                    <td>{$v.address_detail}</td>
+                </tr>
+                <tr>
+                    <td align="right">手机：</td>
+                    <td>{$v.address_tel}</td>
+                </tr>
+            </table>
+
+            <p align="right">
+                {if condition="$v['address_dafault'] eq 1"}
+                <font color="#ff4e00">已默认</font>&nbsp; &nbsp; &nbsp; &nbsp;
+                {else /}
+                <a href="javascript:;" class="dafault" address_id="{$v.address_id}" style="color:#ff4e00;">设为默认</a>&nbsp; &nbsp; &nbsp; &nbsp;
+                {/if}
+                <a href="{:url('member_address/addressupdate')}?address_id={$v.address_id}" style="color:#ff4e00;">编辑</a>&nbsp; &nbsp; &nbsp; &nbsp;
+            </p>
+
+        </div>
+        {/volist}
+        <table border="0" class="add_tab" style="width:930px;"  cellspacing="0" cellpadding="0">
+            <tr>
+                <td align="right">收货人姓名</td>
+                <td style="font-family:'宋体';"><input type="text" name="address_name" id="address_name" />（必填）</td>
+                <td align="right">手机</td>
+                <td style="font-family:'宋体';"><input type="text" name="address_tel" id="address_tel" />（必填）</td>
+            </tr>
+            <tr>
+                <td width="135" align="right">配送地区</td>
+                <td colspan="3" style="font-family:'宋体';">
+                    <select  style="background-color:#f6f6f6;" class="area" id="province">
+                        <option value="0">请选择...</option>
+                        {volist name='province' id='v'}
+                        <option value="{$v.id}">{$v.name}</option>
+                        {/volist}
+                    </select>
+                    <select   class="area" id="city">
+                        <option value="0">请选择...</option>
+                    </select>
+                    <select  class="area" id="district">
+                        <option value="0">请选择...</option>
+                    </select>
+                    （必填）
+                </td>
+            </tr>
+            <tr>
+                <td align="right">详细地址</td>
+                <td style="font-family:'宋体';" colspan="3"><input type="text" id="address_detail" style="width:400px;" />（必填）</td>
+            </tr>
+            <tr>
+                <td align="right" colspan="4">
+                    <input type="checkbox" id="box">
+                    设置为默认地址
+                </td>
+            </tr>
+        </table>
+        <p align="right">
+            <a href="javascript:;" class="add_b">添加</a>
+        </p>
+    </div>
+    </div>
+</div>
+    <script>
+        $(function(){
+            layui.use(['layer'],function(){
+                var layer=layui.layer;
+                //layer.msg('11');
+                //省市区 三级联动
+                $('.area').change(function(){
+                    var _this=$(this);
+                    _this.nextAll('select').html("<option value='0'>请选择...</option>");
+                    var id=_this.val();
+                    //console.log(id);
+                    $.post(
+                            "{:url('member_address/getArea')}",
+                            {id:id},
+                            function(res){
+                                var _option="<option value='0'>请选择...</option>";
+                                for(i in res){
+                                    _option+="<option value='"+res[i]['id']+"'>"+res[i]['name']+"</option>";
+                                }
+                                _this.next('select').html(_option);
+                            },
+                            'json'
+                    )
+                });
+                //添加数据
+                $('.add_b').click(function(){
+                    var province=$('#province').val();
+                    var city=$('#city').val();
+                    var district=$('#district').val();
+                    var address_name=$('#address_name').val();
+                    var address_tel=$('#address_tel').val();
+                    var address_detail=$('#address_detail').val();
+                    var box=$('#box').prop('checked');
+                    if(box==true){
+                        box=1;
+                    }else{
+                        box=2;
+                    }
+                    //console.log(box);
+                    //验证
+                    if(address_name=='') {
+                        layer.msg('收货人姓名必填', {icon: 2});
+                    }else if(province=='0'||city=='0'||district=='0'){
+                        layer.msg('配送区域为必选项',{icon:2});
+                    }else if(address_tel==''){
+                        layer.msg('手机号必填',{icon:2});
+                    }else if(address_detail==''){
+                        layer.msg('详细地址必填',{icon:2});
+                    }else {
+                        $.post(
+                                "{:url('member_address/address')}",
+                                {province:province,city:city,district:district,address_man:address_name,address_tel:address_tel,address_detail:address_detail,address_dafault:box},
+                                function(res){
+                                    layer.msg(res.font,{icon:res.code});
+                                    if(res.code==1){
+                                        setTimeout(function(){
+                                                    location.href="{:url('member_address/address')}"},
+                                                2000
+                                        );
+                                    }
+                                },
+                                'json'
+                        );
+                    }
+                });
+                //删除
+                $('.del').click(function(){
+                    var _this=$(this);
+                    var address_id=_this.attr('address_id');
+                    //console.log(address_id);
+                    $.post(
+                            "{:url('member_address/addressdel')}",
+                            {address_id:address_id},
+                            function(res){
+                                layer.msg(res.font,{icon:res.code});
+                                if(res.code==1){
+                                    _this.parents("div[class='address']").remove();
+                                }
+                            },
+                            'json'
+                    );
+                });
+                //设置为默认
+                $('.dafault').click(function(){
+                    var _this=$(this);
+                    var address_id=_this.attr('address_id');
+                    $.post(
+                            "{:url('member_address/addressdafault')}",
+                            {address_id:address_id},
+                            function(res){
+                                layer.msg(res.font,{icon:res.code});
+                                if(res.code==1){
+                                    setTimeout(function(){
+                                                location.href="{:url('member_address/address')}"},
+                                            2000
+                                    );
+                                }
+                            },
+                            'json'
+                    );
+                });
+            });
+        });
+    </script>

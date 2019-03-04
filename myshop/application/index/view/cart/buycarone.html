@@ -1,0 +1,345 @@
+<script type="text/javascript" src="__STATIC__/index/js/n_nav.js"></script>
+{include file="public/top" /}
+<!--Begin 第一步：查看购物车 Begin -->
+<div class="content mar_20">
+    <img src="__STATIC__/index/images/img1.jpg" />
+</div>
+<div class="content mar_20">
+    <table border="0" class="car_tab" style="width:1200px; margin-bottom:50px;" cellspacing="0" cellpadding="0">
+        <tr>
+            <td class="car_th" width="50">多选</td>
+            <td class="car_th" width="440">商品名称及属性</td>
+            <td class="car_th" width="140">单价</td>
+            <td class="car_th" width="150">购买数量</td>
+            <td class="car_th" width="130">小计</td>
+            <td class="car_th" width="150">操作</td>
+        </tr>
+        {if condition="!empty($cartGoodsInfo)"}
+            {volist name="$cartGoodsInfo" id='v'}
+                <tr goods_num="{$v.goods_number}" buy_number="{$v.buy_number}" goods_id="{$v.goods_id}">
+                    <td>
+                        {if condition="$login eq 1"}
+                        <input type="checkbox" class="box" value="{$v.cart_id}">
+                        {else /}
+                        <input type="checkbox" class="box">
+                        {/if}
+                    </td>
+                    <td>
+                        <div class="c_s_img"><img src="__ROOT__/uploads/goodsimg/{$v.goods_img}" width="73" height="73" /></div>
+                        {$v.goods_name}
+                        属性
+                    </td>
+                    <td align="center" id="selfprice">
+                        {$v.market_price}
+                    </td>
+                    <td align="center">
+                        <div class="c_num">
+                            <input type="button" value=""  class="car_btn_1 reduce" />{/*-*/}
+                            <input type="text" value="{$v.buy_number}" class="car_ipt buy_number"  />
+                            <input type="button" value=""  class="car_btn_2 add" />{/*+*/}
+                        </div>
+                    </td>
+                    <td align="center" style="color:#ff4e00;">￥{$v.market_price*$v.buy_number}</td>
+                    <td align="center">
+                        <a href="javascript:;" class="carDel">删除</a>&nbsp; &nbsp;
+                        <a href="javascript:;" class="collection">加入收藏</a>
+                    </td>
+                </tr>
+            {/volist}
+        {/if}
+        <tr height="70">
+            <td colspan="6" style="font-family:'Microsoft YaHei'; border-bottom:0;">
+                <label class="r_rad"><input type="checkbox" name="clear" id="boxAll" /></label><label class="r_txt" id="boxAll">全选</label>
+                <input type="button" value="批量删除" id="bothDel">
+                <input type="button" value="批量收藏" id="allCollection">
+                <span class="fr">
+                    已选<b style="font-size:22px; color:#ff4e00;" id="allnum">0</b>件商品
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    商品总价：<b style="font-size:22px; color:#ff4e00;" id="allprice">￥0</b>
+                </span>
+            </td>
+        </tr>
+        <tr valign="top" height="150">
+            <td colspan="6" align="right">
+                <a href="{:url('Product/productList')}">
+                    <img src="__STATIC__/index/images/buy1.gif" />
+                </a>&nbsp; &nbsp;
+                <a href="javascript:;" id="confirm">
+                    <img src="__STATIC__/index/images/buy2.gif" />
+                </a>
+            </td>
+        </tr>
+    </table>
+</div>
+<!--End 第一步：查看购物车 End-->
+
+<script>
+    $(function(){
+        layui.use(['layer'],function(){
+            var layer=layui.layer;
+            //加
+            $('.add').click(function(){
+                var _this=$(this);
+                getChecked(_this);
+                getNumber(1,_this);
+                getPrice();
+                getBuyNumber(_this);
+            })
+            //减
+            $('.reduce').click(function(){
+                var _this=$(this);
+                getChecked(_this);
+                getNumber(2,_this);
+                getPrice();
+                getBuyNumber(_this);
+            })
+            //改变数量
+            function getNumber(type,_this){
+                var _tr=_this.parents('tr');
+                var buy_number=parseInt(_tr.attr('buy_number'));
+                var goods_num=parseInt(_tr.attr('goods_num'));
+                if(type==1){
+                    //加
+                    var _input=_this.prev();
+                    _input.prev().prop('disabled',false);
+                    if(buy_number>=goods_num){
+                        //alert(4);
+                        buy_number=goods_num;
+                        _input.val(buy_number);
+                        _this.prop('disabled',true);
+                    }else{
+                        buy_number+=1;
+                        //console.log(buy_number);
+                        _input.val(buy_number);
+                        //console.log(_input.val());
+                    }
+                    _tr.attr('buy_number',buy_number);
+                }else{
+                    //减
+                    var _input=_this.next();
+                    _input.next().prop('disabled',false);
+                    if(buy_number<=1){
+                        buy_number=1;
+                        _input.val(1);
+                        _input.prop('disabled',true);
+                    }else{
+                        buy_number-=1;
+                        _input.val(buy_number);
+                    }
+                    _tr.attr('buy_number',buy_number);
+                }
+                var _priceAll='￥'+parseInt(_input.val())*parseInt(_this.parents('td').prev().text());
+                _this.parents('td').next().html(_priceAll);
+            }
+            //数量框失去焦点
+            $('.buy_number').blur(function(){
+                var _this=$(this);
+                var _tr=_this.parents('tr');
+                var goods_num=parseInt(_tr.attr('goods_num'));
+                var buy_number=parseInt(_this.val());
+                var reg=/^[1-9]\d{0,}$/;
+                if(reg.test(buy_number)){
+                    if(buy_number>=goods_num){
+                        buy_number=goods_num;
+                        _this.val(buy_number);
+                    }else{
+                        _this.val(buy_number);
+                    }
+                }else{
+                    _this.val(1);
+                }
+                _tr.attr('buy_number',buy_number);
+                var _priceAll='￥'+buy_number*parseInt(_this.parents('td').prev().text());
+                _this.parents('td').next().html(_priceAll);
+                getChecked(_this);
+                getPrice();
+                getBuyNumber(_this);
+            });
+            //多选
+            $('.box').click(function(){
+                getPrice();
+            });
+            //全部选中
+            $('#boxAll').click(function(){
+                //alert(1)
+                var _this=$(this);
+                //console.log(_this.prop('checked'));
+                if(_this.prop('checked')==true){
+                    //alert(1)
+                    $('.box').prop('checked',true);
+                }else{
+                    $('.box').prop('checked',false);
+                }
+                getPrice();
+            })
+            //修改数量行默认选中
+            function getChecked(_this){
+                var _box=_this.parents('tr').find('td').eq(0).find('input');
+                _box.prop('checked',true);
+                //console.log(_box);
+            }
+            //计算总价
+            function getPrice(){
+                var _box=$('.box');
+                var allprice=0;
+                var num=0;
+                for(var i in _box){
+                    if(_box[i].checked==true){
+                        var price=_box.eq(i).parents('tr').children('td').eq(4).text();
+                        var price=parseInt(price.substr(1));
+                        allprice+=price;
+                        num+=1;
+                    }
+                }
+                $('#allnum').text(num);
+                $('#allprice').text(allprice);
+            }
+            //修改数据到数据库
+            function getBuyNumber(_this){
+                var _tr=_this.parents('tr');
+                var buy_number=_tr.attr('buy_number');
+                var goods_id=_tr.attr('goods_id');
+                var cart_id=_tr.children('td').first().find('input').val();
+                //console.log(cart_id);
+                $.post(
+                    "{:url('cart/getbuynumber')}",
+                    {goods_id:goods_id,buy_number:buy_number,cart_id:cart_id},
+                    function(res){
+                        console.log(res);
+                    }
+                )
+            }
+            //删除单条数据
+            $('.carDel').click(function(){
+                var _this=$(this);
+                var _tr=_this.parents('tr');
+                var goods_id=_tr.attr('goods_id');
+                var cart_id=_tr.children('td').first().find('input').val();
+                $.post(
+                    "{:url('cart/cardel')}",
+                    {goods_id:goods_id,cart_id:cart_id},
+                    function(res){
+                        layer.msg(res.font,{icon:res.code});
+                        if(res.code==1){
+                            _tr.remove();
+                        }
+                    },
+                    'json'
+                )
+            });
+            //批量删除
+            $('#bothDel').click(function(){
+                var cart_id='';
+                var goods_id='';
+                $('.box').each(function(index){
+                    if($(this).prop('checked')==true){
+                        var cid=$(this).val();
+                        cart_id+=','+cid;
+                        var gid=$(this).parents('tr').attr('goods_id');
+                        goods_id+=','+gid;
+                    }
+                })
+                cart_id=cart_id.substr(1);
+                goods_id=goods_id.substr(1);
+                $.post(
+                    "{:url('cart/carDel')}",
+                    {goods_id:goods_id,cart_id:cart_id},
+                    function(res){
+                        layer.msg(res.font,{icon:res.code});
+                        if(res.code==1){
+                            $('.box').each(function(index){
+                                if($(this).prop('checked')==true){
+                                    $(this).parents('tr').remove();
+                                }
+                            });
+                            if($('.box').length==0){
+                                setTimeout(function(){
+                                    location.href="{:url('cart/buycarone')}"},1000);
+                            }
+                        }
+                    },
+                    'json'
+                );
+                //console.log(cart_id);
+            })
+            //收藏
+            $('.collection').click(function(){
+                var _this=$(this);
+                var goods_id=_this.parents('tr').attr('goods_id');
+                $.post(
+                    "{:url('cart/addcollection')}",
+                    {goods_id:goods_id,type:1},
+                    function(res){
+                        layer.msg(res.font,{icon:res.code});
+                    },
+                    'json'
+                );
+            });
+            //批量收藏
+            $('#allCollection').click(function(){
+                var goods_id='';
+                $('.box').each(function(index){
+                    if($(this).prop('checked')==true){
+                        var id=$(this).parents('tr').attr('goods_id');
+                        //console.log(id)
+                        goods_id+=','+id;
+                    }
+                })
+                goods_id=goods_id.substr(1);
+                $.post(
+                    "{:url('cart/addcollection')}",
+                    {goods_id:goods_id,type:2},
+                    function(res){
+                        layer.msg(res.font,{icon:res.code});
+                    },
+                    'json'
+                );
+            })
+            //点击确认计算时   判断是否登陆或者选择商品
+            $('#confirm').click(function () {
+
+                //获取购物车的数据
+                var goods_id='';
+                $('.box').each(function(index){
+                    if($(this).prop('checked')==true){
+                        var cid=$(this).val();
+                        cart_id+=','+cid;
+                        var gid=$(this).parents('tr').attr('goods_id');
+                        goods_id+=','+gid;
+                    }
+                })
+                goods_id=goods_id.substr(1);
+                if(goods_id==''){
+                    alert('必须选一件商品才能让结算');
+                    return false;
+                }
+
+                //获取总价是否为0进而判断是否选择购物车商品
+                var ptotal=$('#allprice').text();
+                var ptotal=parseInt(ptotal.substr(1));
+                if(ptotal==0){
+                    layer.msg('您还没有选择任何一件商品，不能结算',{icon:2});
+                    return false;
+                }
+
+                //判断是否登陆
+                if({$login}==2){
+                    layer.msg('您还没有登陆,请登录后结算',{icon:2});//跳转的太快了
+                    window.location.href="{:url('login/login')}?refer="+window.location.href+"&goods_id="+goods_id;
+                    return false;
+                }
+
+                var t_id='';
+                $('.box').each(function (index) {
+                    if($(this).prop('checked')==true){
+                        var cart_id=$(this).val();
+                        t_id+=','+cart_id;
+                    }
+                })
+                var  cart_id=t_id.substr(1);
+                //console.log(cart_id);
+                location.href="{:url('order/confirmorder')}?cart_id="+cart_id;
+            })
+        })
+    })
+</script>

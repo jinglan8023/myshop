@@ -1,0 +1,82 @@
+<div style="padding: 15px;width:400px">
+    <form class="layui-form" action="">
+        <input type="hidden" name="admin_id" id="admin_id" value="{$data.admin_id}">
+        <!--管理员账号-->
+        <div class="layui-form-item">
+            <label class="layui-form-label">账号</label>
+            <div class="layui-input-block">
+                <input type="text" name="admin_name" required value="{$data.admin_name}" lay-verify="required|checkName" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <!--管理员邮箱-->
+        <div class="layui-form-item">
+            <label class="layui-form-label">邮箱</label>
+            <div class="layui-input-block">
+                <input type="text" name="admin_email" required value="{$data.admin_email}" lay-verify="required|email" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <!--管理员手机-->
+        <div class="layui-form-item">
+            <label class="layui-form-label">手机</label>
+            <div class="layui-input-block">
+                <input type="text" name="admin_tel" required value="{$data.admin_tel}" lay-verify="required|phone|number" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="*">立即修改</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    $(function(){
+        layui.use(['form','layer'],function(){
+            var form=layui.form;
+            var layer=layui.layer;
+            //验证
+            form.verify({
+                checkName:function(value,item){
+                    var admin_id=$('#admin_id').val();
+                    var reg=/^[a-z_]\w{3,11}$/i;
+                    var info;
+                    if(!reg.test(value)){
+                        return '账号数字字母下划线组成，且不以数字开头';
+                    }else{
+                        $.ajax({
+                            url: "{:url('Admin/checkName')}",
+                            method: 'post',
+                            data:{admin_name:value,admin_id:admin_id,type:2},
+                            async:false,
+                            success:function(msg){
+                                if(msg=='no'){
+                                    info='账号已存在';
+                                }
+                            }
+                        });
+                        return info;
+                    }
+                }
+            });
+            form.on('submit(*)',function(data){
+                $.post(
+                        "{:url('Admin/adminUpdate')}",
+                        data.field,
+                        function(result){
+                            layer.msg(result.font,{icon:result.code});
+                            if(result.code==1){
+                                setTimeout(function(){
+                                    location.href="{:url('Admin/adminList')}"},2000);
+                            }
+                        },
+                        'json'
+                );
+                return false;
+            });
+        });
+    });
+</script>

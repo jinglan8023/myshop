@@ -1,0 +1,115 @@
+<div style="padding: 15px;width:800px">
+    <form class="layui-form" action="">
+        <div class="layui-form-item">
+            <label class="layui-form-label">角色名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="role_name" required  lay-verify="required" placeholder="请输入角色名称" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <!--<div class="layui-form-item">
+            <label class="layui-form-label">是否启用</label>
+            <div class="layui-input-block">
+                <input type="checkbox" name="is_yes" lay-skin="switch">
+            </div>
+        </div>-->
+        <div class="layui-form-item">
+            <label class="layui-form-label">权限节点</label>
+            <div class="layui-input-block">
+                {volist name="nodeInfo" id='v'}
+                <fieldset class="layui-elem-field">
+                    <legend>
+                        <input type="checkbox" name="node_id[]" lay-filter="oneNode" title="{$v.node_name}" lay-skin="primary" value="{$v.node_id}">
+                    </legend>
+                    <div class="layui-field-box">
+                        {if condition="!empty($v['son'])"}
+                            {volist name="$v['son']" id='vv'}
+                                <input type="checkbox" name="node_id[]" title="{$vv.node_name}" class="twoNode" lay-filter="twoNode" lay-skin="primary" value="{$vv.node_id}">
+                            {/volist}
+                        {/if}
+                    </div>
+                </fieldset>
+                {/volist}
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    $(function(){
+        layui.use(['layer','form'],function(){
+            var layer=layui.layer;
+            var form=layui.form;
+            //点击顶级节点
+            form.on('checkbox(oneNode)', function(data){
+                var _this=data.othis;
+                var _input=_this.parent('legend').next().children("input[class='twoNode']");
+                //console.log(_input)
+                _input.each(function(index){
+                    if(data.elem.checked==true){
+                        $(this).prop('checked',true);
+                        layui.form.render('checkbox');
+                    }else{
+                        $(this).prop('checked',false);
+                        layui.form.render('checkbox');
+                    }
+                })
+                //console.log(data.elem); //得到checkbox原始DOM对象
+                //console.log(data.elem.checked); //是否被选中，true或者false
+                //console.log(data.value); //复选框value值，也可以通过data.elem.value得到
+                //console.log(data.othis); //得到美化后的DOM对象
+            });
+            //点击子级节点
+            form.on('checkbox(twoNode)',function(data){
+                var _this=data.othis;
+                var _input=_this.parent('div').prev().children('input');
+                //console.log(_input);
+                if(data.elem.checked){
+                    _input.prop('checked',true);
+                }else{
+                    var num=0;
+                    var allinput=_this.siblings('input');
+                    allinput.each(function(index){
+                        if($(this).prop('checked')==false){
+                            num+=1;
+                        }
+                    });
+                    if(num==allinput.length){
+                        _input.prop('checked',false);
+                    }
+                }
+                layui.form.render('checkbox');
+            });
+            //提交
+            form.on('submit(formDemo)', function(data){
+                $.post(
+                    "{:url('role/roleadd')}",
+                    data.field,
+                    function(result){
+                        layer.msg(result.font,{icon:result.code});
+                        if(result.code==1){
+                            layer.open({
+                                type:0,
+                                content:'添加成功',
+                                btn:['展示页面','继续添加'],
+                                yes:function(index,layero){
+                                    location.href="{:url('role/rolelist')}";
+                                },
+                                btn2:function(index,layero){
+                                    location.href="{:url('role/roleadd')}";
+                                }
+                            })
+                        }
+                    },
+                    'json'
+                )
+                return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+            });
+        });
+    });
+</script>

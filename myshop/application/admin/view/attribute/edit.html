@@ -1,0 +1,86 @@
+  <div class="layui-body" >
+    <!-- 内容主体区域 -->
+    <div style="padding: 15px;"><h3>属性管理</h3></div><hr/>
+<div>	
+    <ul>
+        {if condition="isset($errors) eq 1"}
+        {foreach $errors as $vo} 
+        <li>{$vo}</li>
+        {/foreach}
+        {/if}
+    </ul>
+</div>
+    <form class="form-inline" action="{:url('Attribute/save',['tid'=>$tid])}" lay-filter="example" style="width:90%" method="post">
+
+        <div class="layui-form-item">
+      <label class="layui-form-label">属性名称</label>
+      <div class="layui-input-inline">
+
+          <input type="text" name="attr_name" value="" placeholder="请输入属性名称" autocomplete="off" class="layui-input attr_name">
+
+      </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">所属商品类型</label>
+    <div class="layui-input-block">
+      <div class="layui-inline">
+     
+        <div class="layui-input-inline">
+            <select name="type_id" class="form-control">
+            <option value="0" >请选择所属商品类型</option>
+                {foreach $goodsTypeInfo as $vo}
+            <option value="{$vo.type_id}" {if condition="$vo['type_id'] eq $tid"} selected{/if}>{$vo.type_name}</option>
+                {/foreach}
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="layui-form-item">
+    <label class="layui-form-label">属性/规格</label>
+    <div class="checkbox">
+        <input type="radio" name="attr_type" value="0" title="属性"  class="layui-radio" checked="checked"> 属性
+      <input type="radio" name="attr_type" value="1" title="规格"  class="layui-radio"> 规格
+    </div>
+  </div>
+  
+  
+  <div class="layui-form-item layui-form-text">
+    <label class="layui-form-label">录入方式</label>
+    <div class="checkbox">
+        <input type="radio" name="attr_input_type" value="0" title="手工录入"  class="layui-radio" onclick='changetextarea($(this))' checked="checked"> 手工录入
+        <input type="radio" name="attr_input_type" value="1" title="从下面的列表中选择"  class="layui-radio" onclick='changetextarea($(this))'> 从下面的列表中选择
+    </div>
+  </div>
+    <div class="form-group">
+    <label class="layui-form-label">可选值 :</label>
+
+            <textarea name="attr_values" class="form-control attr_values" rows="3" disabled="disabled">
+            </textarea>
+
+  </div>
+
+ 
+  <div class="layui-form-item">
+    <div class="layui-input-block">
+      <input type="submit" class="layui-btn" lay-submit="*" lay-filter="demo1" value="确认修改">
+    </div>
+  </div>
+</form>
+
+</div>
+
+<script>
+   
+    function changetextarea(obj){
+        var status = obj.val();
+        if( status==1 ){
+            $('.attr_values').removeAttr('disabled');
+        }else{  
+            $('.attr_values').attr('disabled','disabled');
+        }
+    }
+
+
+</script>

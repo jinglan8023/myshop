@@ -1,0 +1,83 @@
+<div style="padding: 15px;width:400px">
+    <form class="layui-form" action="">
+        <div class="layui-form-item">
+            <label class="layui-form-label">友链名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="friend_name" required  lay-verify="required|checkName" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">友链地址</label>
+            <div class="layui-input-block">
+                <input type="text" name="friend_url" required  lay-verify="required|checkUrl" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="*">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    $(function(){
+        layui.use(['form','layer'],function(){
+            var form=layui.form;
+            var layer=layui.layer;
+            //验证
+            form.verify({
+                checkName:function(value,item){
+                    var reg=/^.{1,}$/i;
+                    var info
+                    if(!reg.test(value)){
+                        return '友链名称错误';
+                    }else{
+                        $.ajax({
+                            url: "{:url('Friend/checkName')}",
+                            method: 'post',
+                            data:{friend_name:value,type:1},
+                            async:false,
+                            success:function(msg){
+                                if(msg=='no'){
+                                    info='友链名称已存在';
+                                }
+                            }
+                        });
+                        return info;
+                    }
+                },
+                checkUrl:function(value,item){
+                    var reg=/^www\..{1,}\.com$/;
+                    if(!reg.test(value)){
+                        return '友链地址格式错误';
+                    }
+                }
+            });
+            form.on('submit(*)',function(data){
+                $.post(
+                        "{:url('Friend/friendAdd')}",
+                        data.field,
+                        function(result){
+                            layer.msg(result.font,{icon:result.code});
+                            if(result.code==1){
+                                layer.open({
+                                    type:1,
+                                    content:'是否跳转到展示页面?',
+                                    btn:['是','否'],
+                                    yes:function(index,layero){
+                                        location.href='friendList';
+                                    },
+                                    btn2:function(index,layero){
+                                        location.href='friendAdd';
+                                    }
+                                })
+                            }
+                        },
+                        'json'
+                );
+                return false;
+            });
+        });
+    });
+</script>

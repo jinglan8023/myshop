@@ -1,0 +1,63 @@
+<div style="padding: 15px;width:400px">
+    <form class="layui-form" action="">
+        <!--管理员账号-->
+        <div class="layui-form-item">
+            <label class="layui-form-label">网站名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="WEB_NAME" required  lay-verify="required" value="{$info.WEB_NAME?:''}" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <!--管理员账号-->
+        <div class="layui-form-item">
+            <label class="layui-form-label">网站网址</label>
+            <div class="layui-input-block">
+                <input type="text" name="WEB_URL" required  lay-verify="required|url" value="{$info.WEB_URL?:''}" autocomplete="off" class="layui-input">
+            </div>
+        </div><!--管理员账号-->
+        <div class="layui-form-item">
+            <label class="layui-form-label">版权</label>
+            <div class="layui-input-block">
+                <input type="text" name="WEB_COPYRIGHT" required  lay-verify="required" value="{$info.WEB_COPYRIGHT?:''}" autocomplete="off" class="layui-input">
+            </div>
+        </div><!--管理员账号-->
+        <div class="layui-form-item">
+            <label class="layui-form-label">版本号</label>
+            <div class="layui-input-block">
+                <input type="text" name="WEB_RECORD" required  lay-verify="required" value="{$info.WEB_RECORD?:''}" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="*">保存</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    $(function(){
+        layui.use(['form','layer'],function(){
+            var form=layui.form;
+            var layer=layui.layer;
+
+            form.on('submit(*)',function(data){
+                //console.log(data.field);
+                $.post(
+                        "{:url('System/system')}",
+                        data.field,
+                        function(result){
+                            //console.log(result);
+                            layer.msg(result.font,{icon:result.code});
+                            if(result.code==1){
+                                setTimeout(function(){
+                                    location.href="{:url('system/system')}"},2000);
+                            }
+                        },
+                        'json'
+                );
+                return false;
+            });
+        });
+    });
+</script>

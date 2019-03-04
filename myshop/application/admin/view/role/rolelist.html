@@ -1,0 +1,46 @@
+<div style="padding: 15px;width:500px;">
+    <table class="layui-table">
+        <thead>
+        <tr>
+            <th>编号</th>
+            <th>角色名称</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {volist name="roleInfo" id="v"}
+            <tr role_id="{$v.role_id}">
+                <td style="cursor:pointer">
+                    {$v.role_id}
+                </td>
+                <td style="cursor:pointer">
+                    {$v.role_name}
+                </td>
+                <td><a href="javascript:;" class="del">删除</a>&nbsp;&nbsp;<a href="{:url('role/roleUpdate')}?role_id={$v.role_id}">修改</a></td>
+            </tr>
+        {/volist}
+        </tbody>
+    </table>
+</div>
+<script>
+    $(function(){
+        layui.use('layer',function(){
+            //删除
+            $('.del').click(function(){
+                var _this=$(this);
+                var role_id=_this.parents('tr').attr('role_id');
+                $.post(
+                     "{:url('role/roleDel')}",
+                     {role_id:role_id},
+                     function(result){
+                         layer.msg(result.font,{icon:result.code});
+                         if(result.code==1){
+                             _this.parents('tr').remove();
+                         }
+                     },
+                      'json'
+                )
+            });
+        })
+    })
+</script>

@@ -1,0 +1,108 @@
+<link rel="stylesheet" href="__STATIC__/bootstrap.min.css">
+<div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div style="padding: 15px;">
+            <span class="layui-breadcrumb" lay-separator="—">
+                <a href="{:url('Hou/show')}">首页</a>
+                <a href="">权限列表</a>
+                <a href="">角色列表</a>
+            </span>
+
+            <a href="{:url('goodsTypeAdd')}" class="btn btn-default" style="margin-left:300px">添加商品类型</a>
+            <table class="layui-table" lay-even="" lay-skin="row">
+                    <colgroup>
+                        <col width="150">
+                        <col width="150">
+                        <col width="200">
+                        <col>
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>商品类型名</th>
+                            <th>操作</th>
+                        </tr> 
+                    </thead>
+                    <tbody>
+                        {foreach $typeInfo as $v}
+                            <tr myid="{$v.type_id}">
+                                <td>{$v.type_id}</td>
+                                <td>{$v.type_name}</td>
+                                <td>
+                                    <a href="{:url('Attribute/attrAdd')}?tid={$v.type_id}" class="layui-btn layui-btn-xs">属性添加</a>
+                                    <a href="{:url('Attribute/edit')}?tid={$v.type_id}" class="layui-btn layui-btn-xs">编辑</a>
+                                    <button class="layui-btn layui-btn-danger layui-btn-xs mydel"><i class="layui-icon">删除</i></button>
+                                </td>
+                            </tr>
+                        {/foreach}
+                    </tbody>
+            </table>  
+            <div  name="box" align="center"><?php echo $typeInfo->render();?></div>
+        </div>
+</div>
+<script href="__STATIC__/jquery-3.2.1.min.js"></script>
+<script>
+    $(function(){
+        layui.use(['table','layer'],function() {
+            var table = layui.table;
+            var layer = layui.layer;
+
+          //删除
+            $('.mydel').click(function(){
+                var myParent = $(this).parent().parent();
+                var tid = myParent.attr('myid');
+                //alert(tid);
+                layer.confirm('真的删除行么', function(index){
+                    $.post("{:url('Attribute/delete')}",{id:tid},function(json_info){
+                        if(json_info.code==1){
+                            myParent.css('display','none');
+                            layer.close(index);
+                        }else(
+                                alert('删除失败')
+                        )
+                    })
+                })
+            })
+
+        })
+    })
+
+
+
+    //$(document).on('click','.mydel',delCla)
+    //$(".mydel").click(this,delClass)
+
+    
+   $("[name='phone']").blur(function(){
+        var key=$(this).val();
+        //console.log(val);
+        var sou=$("[name='tiaojian']").val();
+        
+        $.get("{:url('index')}",{val:key,sou:sou},function(data){
+        //     //console.log(data);
+            var aa=data.arr.data;
+            var page=data.page;
+            //console.log(page);
+            var str='';
+            //var page=$(".active span").text();
+            $.each(aa,function(i,v){
+                str+="<tr myid='"+v.admin_id+"'>"+
+                    "<td>"+v.type_id+"</td>"+
+                    "<td>"+v.type_name+"</td>"+
+                    "<td>"+v.admin_email+"</td>"+
+                    "<td>"+v.admin_tel+"</td>"+
+                    "<td>"+v.add_time+"</td>"+
+                    "<td>"+
+                        "<a href='Attribute/attrAdd?id="+v.t_id+"' class='layui-btn layui-btn-xs'>属性添加</a>"+
+                        "<a href='Attribute/edit?id="+v.t_id+"' class='layui-btn layui-btn-xs'>编辑</a>"+
+                        "<button class='layui-btn layui-btn-danger layui-btn-xs mydel'><i class='layui-icon'>删除</i></button>"+
+                    "</td>"+
+                    "</tr>";
+            })
+            $("tbody").html(str);
+            $("[name='box']").html(page);
+            $(".mydel").on('click',delClass);
+        })
+    
+   })
+</script>

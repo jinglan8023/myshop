@@ -1,0 +1,136 @@
+{include file="public/m_top" /}
+<!--End Header End-->
+<div class="i_bg bg_color">
+    <!--Begin 用户中心 Begin -->
+    <div class="m_content">
+        {include file="public/m_left" /}
+        <div class="m_right">
+            <input type="hidden" id="address_id" value="{$info.address_id}">
+            <table border="0" class="add_tab" style="width:930px;margin-top:50px;"  cellspacing="0" cellpadding="0">
+                <tr>
+                    <td align="right">收货人姓名</td>
+                    <td style="font-family:'宋体';"><input type="text" value="{$info.address_man}" id="address_name" />（必填）</td>
+                    <td align="right">手机</td>
+                    <td style="font-family:'宋体';"><input type="text" name="address_tel" value="{$info.address_tel}" id="address_tel" />（必填）</td>
+                </tr>
+                <tr>
+                    <td width="135" align="right">配送地区</td>
+                    <td colspan="3" style="font-family:'宋体';">
+                        <select  style="background-color:#f6f6f6;" class="area" id="province">
+                            <option value="0">请选择...</option>
+                            {volist name='province' id='v'}
+                            {if condition="$info['province']==$v['id']"}
+                            <option value="{$v.id}" selected>{$v.name}</option>
+                            {else /}
+                            <option value="{$v.id}">{$v.name}</option>
+                            {/if}
+                            {/volist}
+                        </select>
+                        <select   class="area" id="city">
+                            <option value="0">请选择...</option>
+                            {volist name='city' id='v'}
+                            {if condition="$info['city']==$v['id']"}
+                            <option value="{$v.id}" selected>{$v.name}</option>
+                            {else /}
+                            <option value="{$v.id}">{$v.name}</option>
+                            {/if}
+                            {/volist}
+                        </select>
+                        <select  class="area" id="district">
+                            <option value="0">请选择...</option>
+                            {volist name='district' id='v'}
+                            {if condition="$info['district']==$v['id']"}
+                            <option value="{$v.id}" selected>{$v.name}</option>
+                            {else /}
+                            <option value="{$v.id}">{$v.name}</option>
+                            {/if}
+                            {/volist}
+                        </select>
+                        （必填）
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">详细地址</td>
+                    <td style="font-family:'宋体';" colspan="3"><input type="text" value="{$info.address_detail}" id="address_detail" style="width:400px;" />（必填）</td>
+                </tr>
+                <tr>
+                    <td align="right" colspan="4">
+                        <input type="checkbox" id="box" {if condition="$info['address_dafault'] eq 1"}checked{else /}{/if}>
+                        设置为默认地址
+                    </td>
+                </tr>
+            </table>
+            <p align="right">
+                <a href="javascript:;" class="add_b">修改</a>
+            </p>
+        </div>
+    </div>
+</div>
+<script>
+    $(function(){
+        layui.use('layer',function(){
+            var layer=layui.layer;
+            //省市区 三级联动
+            $('.area').change(function(){
+                var _this=$(this);
+                _this.nextAll('select').html("<option value='0'>请选择...</option>");
+                var id=_this.val();
+                //console.log(id);
+                $.post(
+                        "{:url('member_address/getArea')}",
+                        {id:id},
+                        function(res){
+                            var _option="<option value='0'>请选择...</option>";
+                            for(i in res){
+                                _option+="<option value='"+res[i]['id']+"'>"+res[i]['name']+"</option>";
+                            }
+                            _this.next('select').html(_option);
+                        },
+                        'json'
+                )
+            });
+            //添加数据
+            $('.add_b').click(function(){
+                var address_id=$('#address_id').val();
+                var province=$('#province').val();
+                var city=$('#city').val();
+                var district=$('#district').val();
+                var address_name=$('#address_name').val();
+                var address_tel=$('#address_tel').val();
+                var address_detail=$('#address_detail').val();
+                var box=$('#box').prop('checked');
+                if(box==true){
+                    box=1;
+                }else{
+                    box=2;
+                }
+                //console.log(box);
+                //验证
+                if(address_name=='') {
+                    layer.msg('收货人姓名必填', {icon: 2});
+                }else if(province=='0'||city=='0'||district=='0'){
+                    layer.msg('配送区域为必选项',{icon:2});
+                }else if(address_tel==''){
+                    layer.msg('手机号必填',{icon:2});
+                }else if(address_detail==''){
+                    layer.msg('详细地址必填',{icon:2});
+                }else {
+                    $.post(
+                            "{:url('member_address/addressupdate')}",
+                            {address_id:address_id,province:province,city:city,district:district,address_man:address_name,address_tel:address_tel,address_detail:address_detail,address_dafault:box},
+                            function(res){
+                                layer.msg(res.font,{icon:res.code});
+                                if(res.code==1){
+                                    setTimeout(function(){
+                                                location.href="{:url('member_address/address')}"},
+                                            2000
+                                    );
+                                }
+                            },
+                            'json'
+                    );
+                }
+            });
+        });
+    })
+</script>

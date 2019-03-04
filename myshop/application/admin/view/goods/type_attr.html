@@ -1,0 +1,64 @@
+{__NOLAYOUT__}
+<table width="100%" id="attrTable">
+    <tbody>
+    {foreach $data as $k=>$v}
+        {if condition="$v['attr_type'] eq 0 && $v['attr_input_type'] eq 0 "}
+        <tr>
+            <td class="label">{$v.attr_name}</td>
+            <td>
+                <input name="attr_value_list[{$v.attr_id}]" type="text" value="" size="40">
+            </td>
+        </tr>
+        {/if}
+        {if condition="$v['attr_type'] eq 0 && $v['attr_input_type'] eq 1 "}
+        <tr>
+            <td class="label">{$v.attr_name}</td>
+            <td>
+                <select name="attr_value_list[]">
+                    <!--{volist name="$v['attr_values']" id="vv"}-->
+                            <!--<option value="{$vv}">{$vv}</option>-->
+                    <!--{/volist}-->
+                    {foreach $v['attr_values'] as $kk=>$vv}
+                    <option value="{$vv}">{$vv}</option>
+                    {/foreach}
+                </select>
+            </td>
+        </tr>
+        {/if}
+        {if condition="$v['attr_type'] eq 1 && $v['attr_input_type'] eq 0 "}
+        <tr>
+            <td class="label">
+                <a href="javascript:;" onclick="addSpec(this)">[+]</a>{$v.attr_name}
+            </td>
+            <td>
+                <input name="attr_value_list[{$v.attr_id}]" type="text" value="" size="40">
+                属性价格 <input type="text" name="attr_price_list[{$v.attr_id}][]" value="" size="5" maxlength="10">
+            </td>
+        </tr>
+        {/if}
+        {if condition="$v['attr_type'] eq 1 && $v['attr_input_type'] eq 1 "}
+        <tr>
+            <td class="label">
+                <a href="javascript:;" onclick="addSpec(this)">[+]</a>{$v.attr_name}
+            </td>
+            <td>
+                <input type="hidden" name="attr_id_list[]" value="{$v.attr_name}">
+                <select name="attr_value_list[{$v.attr_id}][]">
+                    <!--{volist name="$v['attr_values']" id="vv"}-->
+                        <!--{if condition="$vv"}-->
+                            <!--<option value="{$vv}">{$vv}</option>-->
+                        <!--{/if}-->
+                    <!--{/volist}-->
+                    {foreach $v['attr_values'] as $kk=>$vv}
+                        <option value="{$vv}">{$vv}</option>
+                    {/foreach}
+                </select> 属性价格
+                <input type="text" name="attr_price_list[{$v.attr_id}][]" value="" size="5" maxlength="10">
+            </td>
+        </tr>
+        {/if}
+    {/foreach}
+    </tbody>
+</table>
+
+        

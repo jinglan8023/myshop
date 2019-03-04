@@ -1,0 +1,77 @@
+<div style="padding: 15px;width:400px">
+    <form class="layui-form" action="">
+        <input type="hidden" name="friend_id" id="friend_id" value="{$data.friend_id}">
+        <div class="layui-form-item">
+            <label class="layui-form-label">友链名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="friend_name" required value="{$data.friend_name}" lay-verify="required|checkName" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">友链地址</label>
+            <div class="layui-input-block">
+                <input type="text" name="friend_url" required value="{$data.friend_url}" lay-verify="required|checkUrl" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="*">立即修改</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    $(function(){
+        layui.use(['form','layer'],function(){
+            var form=layui.form;
+            var layer=layui.layer;
+            //验证
+            form.verify({
+                checkName:function(value,item){
+                    var reg=/^.{1,}$/i;
+                    var info
+                    if(!reg.test(value)){
+                        return '友链名称错误';
+                    }else{
+                        $.ajax({
+                            url: "{:url('Friend/checkName')}",
+                            method: 'post',
+                            data:{friend_name:value,type:2},
+                            async:false,
+                            success:function(msg){
+                                if(msg=='no'){
+                                    info='友链名称已存在';
+                                }
+                            }
+                        });
+                        return info;
+                    }
+                },
+                checkUrl:function(value,item){
+                    var reg=/^www\..{1,}\.com$/;
+                    if(!reg.test(value)){
+                        return '友链地址格式错误';
+                    }
+                }
+            });
+            form.on('submit(*)',function(data){
+                $.post(
+                        "{:url('Friend/friendUpdate')}",
+                        data.field,
+                        function(result){
+                            layer.msg(result.font,{icon:result.code});
+                            if(result.code==1){
+                                if(result.code==1){
+                                    setTimeout(function(){
+                                        location.href="{:url('friendList')}"},2000);
+                                }
+                            }
+                        },
+                        'json'
+                );
+                return false;
+            });
+        });
+    });
+</script>

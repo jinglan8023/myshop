@@ -1,0 +1,132 @@
+<div style="padding: 15px;width:400px">
+    <form class="layui-form" action="">
+        <div class="layui-form-item">
+            <label class="layui-form-label">品牌名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="brand_name" required  lay-verify="required|checkName" placeholder="请输入品牌名称" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">品牌网址</label>
+            <div class="layui-input-block">
+                <input type="text" name="brand_url" required  lay-verify="required|checkUrl" placeholder="请输入品牌网址" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">品牌logo</label>
+            <div class="layui-input-block">
+                <input type="hidden" name="brand_logo" id="brand_logo" lay-verify="required">
+                <button type="button" class="layui-btn" id="logo">
+                    <i class="layui-icon">&#xe67c;</i>上传图片
+                </button>
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">品牌简介</label>
+            <div class="layui-input-block">
+                <textarea name="brand_describe" placeholder="请输入内容" class="layui-textarea" lay-verify="required"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">是否展示</label>
+            <div class="layui-input-block">
+                <input type="radio" name="is_show" value="1" title="是">
+                <input type="radio" name="is_show" value="2" title="否" checked>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+  $(function(){
+      layui.use(['form','layer','upload'],function(){
+          var form=layui.form;
+          var layer=layui.layer;
+          var upload=layui.upload;
+          //文件上传
+          var uploadInst = upload.render({
+              elem: '#logo' //绑定元素
+              , url: "{:url('brand/brandLogo')}" //上传接口
+              ,accept:"images"
+              ,exts:'jpg|jpeg|png|gif'
+              ,size:4096
+              , done: function (res) {
+                  layer.msg(res.font,{icon:res.code});
+                  if(res.code==1){
+                      $('#brand_logo').val(res.src);
+                  }
+              }
+              , error: function () {
+                  //请求异常回调
+              }
+          });
+          //验证
+          form.verify({
+              checkName:function(value,item){
+                  var reg=/^.{1,}$/i;
+                  var info
+                  //console.log(value);
+                  if(!reg.test(value)){
+                      return '品牌名称错误';
+                  }else{
+                      $.ajax({
+                          url: "{:url('Brand/checkName')}",
+                          method: 'post',
+                          data:{brand_name:value,type:1},
+                          async:false,
+                          success:function(msg){
+                              if(msg=='no'){
+                                  info='品牌名称已存在';
+                              }
+                          }
+                      });
+                      return info;
+                  }
+              },
+              checkUrl:function(value,item){
+                  var reg=/^www\..{1,}\.com$/;
+                  if(!reg.test(value)){
+                      return '品牌地址格式错误';
+                  }
+              }
+          });
+          //监听提交
+          form.on('submit(formDemo)', function(data){
+              $.post(
+                   "{:url('brand/brandAdd')}",
+                   data.field,
+                   function(result){
+                        layer.msg(result.font,{icon:result.code});
+                        if(result.code==1){
+                            layer.open({
+                                   type:1,
+                                   content:'添加成功',
+                                   btn:['展示页面','继续添加'],
+                                   yes:function(index,layero){
+                                        location.href='brandList';
+                                   },
+                                   btn2:function(index,layero){
+                                        location.href='brandAdd';
+                                   }
+                           })
+                       }
+                   },
+                   'json'
+               )
+
+              return false;
+          });
+      });
+  });
+</script>

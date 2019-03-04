@@ -1,0 +1,53 @@
+<div style="padding: 15px;width:400px">
+    <form class="layui-form" action="">
+        <input type="hidden" name="admin_id" value="{$admin_id}">
+        <div class="layui-form-item">
+            <label class="layui-form-label">角色信息</label>
+            <div class="layui-input-block">
+                {volist name='roleInfo' id='v'}
+                <div>
+                    {in name="$v['role_id']" value="$selectRoleInfo"}
+                    <input type="checkbox" name="role_id[]" value="{$v.role_id}" title="{$v.role_name}" lay-skin="primary" checked>
+                    {else /}
+                    <input type="checkbox" name="role_id[]" value="{$v.role_id}" title="{$v.role_name}" lay-skin="primary">
+                    {/in}
+                </div>
+                {/volist}
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    $(function(){
+        layui.use(['layer','form'],function(){
+            var layer=layui.layer;
+            var form=layui.form;
+            //阻止提交
+            form.on('submit(formDemo)', function(data){
+                console.log(data.field);
+                $.post(
+                        "{:url('admin/giverole')}",
+                        data.field,
+                        function(result){
+                            layer.msg(result.font,{icon:result.code});
+                            if(result.code==1) {
+                                setTimeout(function () {
+                                    location.href = "{:url('admin/adminlist')}"
+                                }, 2000);
+                            }
+                        },
+                        'json'
+                )
+
+                return false;
+            });
+        })
+    })
+</script>
